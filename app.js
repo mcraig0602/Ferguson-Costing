@@ -30,53 +30,74 @@ let wb = new xl.Workbook({
   author: "Ballerific" // Name for use in features such as comments
 });
 
-let standard = wb.createStyle({
+const standard = wb.createStyle({
   font: {
     color: "#000000",
     size: 12
   }
 });
-let accounting = wb.createStyle({
+const accounting = wb.createStyle({
   font: {
     color: "#000000",
     size: 12
   },
   numberFormat: "$#,##0.00; ($#,##0.00); -"
 });
-let number = wb.createStyle({
+const number = wb.createStyle({
   font: {
     color: "#000000",
     size: 12
   },
   numberFormat: "####"
 });
-let floating = wb.createStyle({
+const floating = wb.createStyle({
   font: {
     color: "#000000",
     size: 12
   },
   numberFormat: "###.##"
 });
-let percent = wb.createStyle({
+const percent = wb.createStyle({
   font: {
     color: "#000000",
     size: 12
   },
   numberFormat: "#.00%; -#.00%; -"
 });
-let h1 = wb.createStyle({
+const h1 = wb.createStyle({
+  font: {
+    color: "#ffffff",
+    size: 48,
+    bold: true
+  },
+  alignment: { horizontal: "center" },
+  fill: {
+    type: "pattern",
+    patternType: "solid",
+    fgColor: "#3366ff"
+  }
+});
+const h2 = wb.createStyle({
   font: {
     color: "#000000",
-    size: 48
+    size: 36,
+    bold: true
   },
   alignment: { horizontal: "center" }
 });
-let h2 = wb.createStyle({
+const h3 = wb.createStyle({
   font: {
     color: "#000000",
-    size: 14
+    size: 14,
+    bold: true
   },
-  alignment: { horizontal: "center" }
+  alignment: { horizontal: "center" },
+  border: {
+    bottom: {
+      style: "medium",
+      color: "#000000"
+    }
+  }
 });
 const headers = {
   Master: {
@@ -404,7 +425,7 @@ master = function(mstr, my) {
   h.forEach(head => {
     ws.cell(2, j)
       .string(head)
-      .style(h2);
+      .style(h3);
     j++;
   });
   mstr.forEach(master => {
@@ -485,25 +506,81 @@ master = function(mstr, my) {
   //Exterior
   ws.cell(5, 1)
     .string(ext[0])
-    .style(standard);
+    .style(standard)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 2)
     .number(ext[1])
-    .style(accounting);
+    .style(accounting)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 3)
     .number(ext[2])
-    .style(accounting);
+    .style(accounting)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 4)
     .number(ext[3])
-    .style(accounting);
+    .style(accounting)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 5)
     .number(ext[4])
-    .style(accounting);
+    .style(accounting)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 6)
     .number(ext[5])
-    .style(accounting);
+    .style(accounting)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   ws.cell(5, 7)
     .number(ext[6])
-    .style(percent);
+    .style(percent)
+    .style({
+      border: {
+        bottom: {
+          style: "medium",
+          color: "#000000"
+        }
+      }
+    });
   //Totals
   ws.cell(6, 1)
     .string(total[0])
@@ -530,6 +607,8 @@ master = function(mstr, my) {
 salesmen = function(mstr, header, my) {
   let salesmanU = [];
   let salesmenInd = {};
+  let w = 0;
+  header[0].forEach(col => (w += headers[col]["Sales"] ? 1 : 0));
   mstr.forEach(sale => {
     if (salesmanU.indexOf(sale[7]) === -1) {
       if (sale[7] !== "") salesmanU.push(sale[7]);
@@ -537,11 +616,10 @@ salesmen = function(mstr, header, my) {
   });
   salesmenInd.master = salesmanU;
   for (i = 0; i < salesmanU.length; i++) {
-    console.log(salesmanU[i]);
     let ws = wb.addWorksheet(salesmanU[i]);
-    ws.cell(1, 1, 1, 7, true)
+    ws.cell(1, 1, 1, w, true)
       .string(`${salesmanU[i]}- ${my[0]} ${my[1]}`)
-      .style(h1);
+      .style(h2);
     let columns = [];
     let j = 1;
     header[0].forEach(head => {
@@ -549,27 +627,12 @@ salesmen = function(mstr, header, my) {
       if (headers[head]["Sales"]) {
         ws.cell(2, j)
           .string(headers[head]["display"])
-          .style(standard);
+          .style(h3);
         j++;
       }
     });
     let indS = [];
     mstr.forEach(row => {
-      let k = 1;
-      if (salesmanU[i] === row[7]) {
-        indS.push(row);
-        row.forEach((col, j) => {
-          if (headers[columns[j]]["Sales"]) {
-            console.log(indS.length);
-            ws.cell(indS.length + 2, k)
-              .string(col ? col : "")
-              .style(standard);
-            k++;
-          }
-        });
-      }
-    });
-    /* mstr.forEach(row => {
       let k = 1;
       if (salesmanU[i] === row[7] && row[7] !== null && row[7] !== "") {
         indS.push(row);
@@ -615,14 +678,16 @@ salesmen = function(mstr, header, my) {
           }
         });
       }
-    }); */
+    });
   }
 };
 residential = function(mstr, header, my) {
   let ws = wb.addWorksheet("Residential");
-  ws.cell(1, 1, 1, 14, true)
+  let w = 0;
+  header[0].forEach(col => (w += headers[col]["Residential"] ? 1 : 0));
+  ws.cell(1, 1, 1, w, true)
     .string(`Residential Cost and Profit Margin - ${my[0]} ${my[1]}`)
-    .style(h1);
+    .style(h2);
   let resident = [];
   let srtInv = [];
   let sortRes = [];
@@ -633,7 +698,7 @@ residential = function(mstr, header, my) {
     if (headers[head]["Residential"]) {
       ws.cell(2, j)
         .string(headers[head]["display"])
-        .style(h2);
+        .style(h3);
       j++;
     }
   });
@@ -695,9 +760,11 @@ residential = function(mstr, header, my) {
 };
 commercial = function(mstr, header, my) {
   let ws = wb.addWorksheet("Commercial");
-  ws.cell(1, 1, 1, 11, true)
+  let w = 0;
+  header[0].forEach(col => (w += headers[col]["Commercial"] ? 1 : 0));
+  ws.cell(1, 1, 1, w, true)
     .string(`Commercial Cost and Profit Margin - ${my[0]} ${my[1]}`)
-    .style(h1);
+    .style(h2);
   let comm = [];
   let srtInv = [];
   let sortCom = [];
@@ -708,7 +775,7 @@ commercial = function(mstr, header, my) {
     if (headers[head]["Commercial"]) {
       ws.cell(2, j)
         .string(headers[head]["display"])
-        .style(h2);
+        .style(h3);
       j++;
     }
   });
@@ -770,9 +837,11 @@ commercial = function(mstr, header, my) {
 };
 exterior = function(mstr, header, my) {
   let ws = wb.addWorksheet("Exterior");
-  ws.cell(1, 1, 1, 10, true)
+  let w = 0;
+  header[0].forEach(col => (w += headers[col]["Exterior"] ? 1 : 0));
+  ws.cell(1, 1, 1, w, true)
     .string(`Exterior Cost and Profit Margin - ${my[0]} ${my[1]}`)
-    .style(h1);
+    .style(h2);
   let ext = [];
   let srtInv = [];
   let sortExt = [];
@@ -783,7 +852,7 @@ exterior = function(mstr, header, my) {
     if (headers[head]["Exterior"]) {
       ws.cell(2, j)
         .string(headers[head]["display"])
-        .style(h2);
+        .style(h3);
       j++;
     }
   });
